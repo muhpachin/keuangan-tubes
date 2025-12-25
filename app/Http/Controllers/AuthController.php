@@ -10,75 +10,102 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
-    public function showLogin() { return view('auth.login'); }
-    
-    public function login(Request $request) {
-        // Cek username & password
-        if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
-            return redirect()->route('dashboard');
-        }
-        return back()->with('error', 'Username atau password salah');
+    // Menampilkan Halaman Login
+    public function showLogin() { 
+        return view('auth.login'); 
     }
 
-    public function showRegister() { return view('auth.register'); }
+    // Menampilkan Halaman Register
+    public function showRegister() { 
+        return view('auth.register'); 
+    }
 
-    public function register(Request $request) {
+    // Proses Register (DIPERBAIKI: Menghapus 'name', menggunakan 'username')
+    public function register(Request $request)
+    {
+        // 1. Validasi Input
         $request->validate([
-            'username' => 'required|unique:users',
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
+            'username' => 'required|unique:users', // Cek unik username
             'password' => 'required|min:6',
             'security_question' => 'required',
-            'security_answer' => 'required'
+            'security_answer' => 'required',
         ]);
 
-        $user = User::create([
-            'username' => $request->username,
-            'name' => $request->name,
-            'email' => $request->email,
+        // 2. Simpan ke Database
+        User::create([
+            'username' => $request->username, // Pakai username
+            // 'name' => $request->name, <--- BARIS INI SUDAH DIHAPUS AGAR TIDAK ERROR
             'password' => Hash::make($request->password),
             'security_question' => $request->security_question,
-            'security_answer' => $request->security_answer,
-            'tipe_akun' => 'gratis'
+            // Hash jawaban keamanan agar aman
+            'security_answer' => Hash::make(strtolower(trim($request->security_answer))),
+            'tipe_akun' => 'gratis', // Set default tipe akun
         ]);
 
-        Auth::login($user);
-        return redirect()->route('dashboard')->with('success', 'Selamat datang! Akun berhasil dibuat.');
+        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan login.');
     }
 
-    public function redirectToGoogle() { return Socialite::driver('google')->redirect(); }
+    // Proses Login
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'username' => 'required',
+            'password' => 'required',
+        ]);
 
-    public function handleGoogleCallback() {
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->route('dashboard');
+        }
+
+        return back()->with('error', 'Username atau password salah.');
+    }
+
+    // Proses Logout
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('login');
+    }
+
+    // --- GOOGLE LOGIN ---
+    public function redirectToGoogle() { 
+        return Socialite::driver('google')->redirect(); 
+    }
+
+    public function handleGoogleCallback()
+    {
         try {
             $googleUser = Socialite::driver('google')->user();
-            // Cek berdasarkan google_id atau email
+            
+            // Cek user berdasarkan Google ID atau Email
             $user = User::where('google_id', $googleUser->getId())
                         ->orWhere('email', $googleUser->getEmail())
                         ->first();
 
             if (!$user) {
-                // Register User Baru
+                // Register User Baru dari Google
                 $user = User::create([
-                    'username' => $googleUser->getName(),
+                    'username' => $googleUser->getName(), // Gunakan nama Google sebagai username awal
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
                     'tipe_akun' => 'gratis',
-                    'password' => null, 
+                    'password' => null, // User Google tidak butuh password
                 ]);
             } else {
-                // Update Google ID jika belum ada
-                if (!$user->google_id) $user->update(['google_id' => $googleUser->getId()]);
+                // Jika user ada tapi belum link Google ID
+                if (!$user->google_id) {
+                    $user->update(['google_id' => $googleUser->getId()]);
+                }
             }
 
             Auth::login($user);
             return redirect()->route('dashboard');
+            
         } catch (\Exception $e) {
-            return redirect()->route('login')->with('error', 'Login Google Gagal.');
+            return redirect()->route('login')->with('error', 'Login Google Gagal: ' . $e->getMessage());
         }
-    }
-
-    public function logout() {
-        Auth::logout();
-        return redirect()->route('login');
     }
 }
