@@ -8,9 +8,13 @@ use App\Http\Controllers\PengeluaranController;
 use App\Http\Controllers\RekeningController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\UtangController;
+use App\Http\Controllers\Admin\LandingPageController;
+
+use App\Models\Setting;
 
 Route::get('/', function () {
-    return view('landing');
+    $settings = Setting::where('key', 'like', 'landing_%')->get()->keyBy('key');
+    return view('landing', compact('settings'));
 });
 
 // AUTH
@@ -88,4 +92,8 @@ Route::prefix('admin')->middleware(['auth','is_admin'])->group(function () {
     // System (maintenance)
     Route::get('/system/maintenance', [App\Http\Controllers\Admin\SystemController::class, 'showMaintenance'])->name('admin.system.maintenance');
     Route::post('/system/maintenance/toggle', [App\Http\Controllers\Admin\SystemController::class, 'toggleMaintenance'])->name('admin.system.maintenance.toggle');
+
+    // Landing Page
+    Route::get('/landing', [LandingPageController::class, 'index'])->name('admin.landing.index');
+    Route::post('/landing', [LandingPageController::class, 'update'])->name('admin.landing.update');
 });

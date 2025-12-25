@@ -84,9 +84,37 @@
         </table>
     </div>
 
-    {{ $users->links() }}
+    {{-- CUSTOM PAGINATION START --}}
+    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+        <div class="text-muted small">
+            Menampilkan <strong>{{ $users->firstItem() ?? 0 }}</strong> sampai <strong>{{ $users->lastItem() ?? 0 }}</strong> dari total <strong>{{ $users->total() }}</strong> user
+        </div>
+        <div>
+            {{-- Tombol Previous --}}
+            @if(!$users->onFirstPage())
+                <a href="{{ $users->previousPageUrl() }}" class="btn btn-outline-secondary btn-sm me-1">
+                    <i class="bi bi-chevron-left"></i> Sebelumnya
+                </a>
+            @else
+                <button class="btn btn-outline-secondary btn-sm me-1" disabled>
+                    <i class="bi bi-chevron-left"></i> Sebelumnya
+                </button>
+            @endif
 
-    <!-- Confirm Modal -->
+            {{-- Tombol Next --}}
+            @if($users->hasMorePages())
+                <a href="{{ $users->nextPageUrl() }}" class="btn btn-primary btn-sm">
+                    Selanjutnya <i class="bi bi-chevron-right"></i>
+                </a>
+            @else
+                <button class="btn btn-outline-secondary btn-sm" disabled>
+                    Selanjutnya <i class="bi bi-chevron-right"></i>
+                </button>
+            @endif
+        </div>
+    </div>
+    {{-- CUSTOM PAGINATION END --}}
+
     <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -105,29 +133,55 @@
 
     @push('scripts')
     <script>
+        console.log("User management script loaded.");
         document.addEventListener('DOMContentLoaded', function(){
+            console.log("DOM fully loaded and parsed.");
             let targetFormSelector = null;
 
             // Initialize bootstrap tooltips
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-                new bootstrap.Tooltip(tooltipTriggerEl)
-            })
+            try {
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                    new bootstrap.Tooltip(tooltipTriggerEl)
+                })
+                console.log("Tooltips initialized.");
+            } catch (e) {
+                console.error("Error initializing tooltips: ", e);
+            }
+
 
             document.querySelectorAll('.btn-confirm-action').forEach(btn => {
+                console.log("Attaching listener to button: ", btn);
                 btn.addEventListener('click', function(e){
+                    console.log("Confirm button clicked.");
                     targetFormSelector = this.getAttribute('data-form');
+                    console.log("Target form selector: ", targetFormSelector);
                     document.getElementById('confirmModalTitle').textContent = this.getAttribute('data-title') || 'Konfirmasi';
                     document.getElementById('confirmModalBody').textContent = this.getAttribute('data-message') || 'Anda yakin?';
-                    var confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
-                    confirmModal.show();
+
+                    try {
+                        var confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+                        confirmModal.show();
+                        console.log("Modal shown.");
+                    } catch (e) {
+                        console.error("Error showing modal: ", e);
+                    }
                 });
             });
 
             document.getElementById('confirmModalConfirm').addEventListener('click', function(){
-                if (!targetFormSelector) return;
+                console.log("Modal confirm button clicked.");
+                if (!targetFormSelector) {
+                    console.error("No target form selector set.");
+                    return;
+                }
                 var form = document.querySelector(targetFormSelector);
-                if (form) form.submit();
+                if (form) {
+                    console.log("Submitting form: ", form);
+                    form.submit();
+                } else {
+                    console.error("Form not found with selector: ", targetFormSelector);
+                }
             });
         });
     </script>

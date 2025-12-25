@@ -33,10 +33,10 @@
         }
         .cta-section { background-color: #f8f9fa; padding: 80px 0; }
         .navbar-brand { font-weight: 800; color: #0d6efd !important; }
-        .btn-light-primary { 
-            background-color: white; 
-            color: #0d6efd; 
-            font-weight: 600; 
+        .btn-light-primary {
+            background-color: white;
+            color: #0d6efd;
+            font-weight: 600;
             border: none;
             padding: 12px 30px;
         }
@@ -83,18 +83,18 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-lg-8">
-                    <h1 class="hero-title mb-4">Kelola Keuangan Anda dengan Lebih Cerdas</h1>
-                    <p class="lead mb-5 opacity-75">Catat pemasukan, atur pengeluaran, dan pantau arus kas Anda dalam satu aplikasi yang mudah digunakan.</p>
+                    <h1 class="hero-title mb-4">{{ $settings['landing_hero_title']->value ?? 'Kelola Keuangan Anda dengan Lebih Cerdas' }}</h1>
+                    <p class="lead mb-5 opacity-75">{{ $settings['landing_hero_subtitle']->value ?? 'Catat pemasukan, atur pengeluaran, dan pantau arus kas Anda dalam satu aplikasi yang mudah digunakan.' }}</p>
                     @auth
                         <a href="{{ route('dashboard') }}" class="btn btn-light-primary btn-lg rounded-pill shadow">Buka Dashboard</a>
                     @else
-                        <a href="{{ route('register') }}" class="btn btn-light-primary btn-lg rounded-pill shadow">Mulai Sekarang Gratis</a>
+                        <a href="{{ route('register') }}" class="btn btn-light-primary btn-lg rounded-pill shadow">{{ $settings['landing_hero_cta_text']->value ?? 'Mulai Sekarang Gratis' }}</a>
                     @endauth
                 </div>
             </div>
             <!-- Mockup Image Placeholder -->
             <div class="mt-5">
-                <img src="https://placehold.co/800x400/2962ff/ffffff?text=Dashboard+Preview" alt="App Preview" class="img-fluid rounded-4 shadow-lg" style="border: 5px solid rgba(255,255,255,0.2);">
+                <img src="{{ $settings['landing_hero_image']->value ?? 'https://placehold.co/800x400/2962ff/ffffff?text=Dashboard+Preview' }}" alt="App Preview" class="img-fluid rounded-4 shadow-lg" style="border: 5px solid rgba(255,255,255,0.2);">
             </div>
         </div>
     </section>
@@ -103,29 +103,29 @@
     <section class="py-5 mt-5">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="fw-bold">Fitur Unggulan</h2>
-                <p class="text-muted">Semua yang Anda butuhkan untuk mengatur dompet Anda.</p>
+                <h2 class="fw-bold">{{ $settings['landing_features_title']->value ?? 'Fitur Unggulan' }}</h2>
+                <p class="text-muted">{{ $settings['landing_features_subtitle']->value ?? 'Semua yang Anda butuhkan untuk mengatur dompet Anda.' }}</p>
             </div>
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="card feature-card p-4 text-center">
-                        <div class="feature-icon">💸</div>
-                        <h5>Pencatatan Mudah</h5>
-                        <p class="text-muted">Catat pemasukan dan pengeluaran harian Anda hanya dalam beberapa klik. Simpel dan cepat.</p>
+                        <div class="feature-icon">{{ $settings['landing_feature_1_icon']->value ?? '💸' }}</div>
+                        <h5>{{ $settings['landing_feature_1_title']->value ?? 'Pencatatan Mudah' }}</h5>
+                        <p class="text-muted">{{ $settings['landing_feature_1_description']->value ?? 'Catat pemasukan dan pengeluaran harian Anda hanya dalam beberapa klik. Simpel dan cepat.' }}</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="card feature-card p-4 text-center">
-                        <div class="feature-icon">🏦</div>
-                        <h5>Multi Rekening</h5>
-                        <p class="text-muted">Kelola saldo dari berbagai sumber: Tunai, Bank, atau E-Wallet dalam satu tempat.</p>
+                        <div class="feature-icon">{{ $settings['landing_feature_2_icon']->value ?? '🏦' }}</div>
+                        <h5>{{ $settings['landing_feature_2_title']->value ?? 'Multi Rekening' }}</h5>
+                        <p class="text-muted">{{ $settings['landing_feature_2_description']->value ?? 'Kelola saldo dari berbagai sumber: Tunai, Bank, atau E-Wallet dalam satu tempat.' }}</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="card feature-card p-4 text-center">
-                        <div class="feature-icon">📊</div>
-                        <h5>Laporan Ringkas</h5>
-                        <p class="text-muted">Pantau kesehatan finansial Anda melalui dashboard yang informatif dan mudah dipahami.</p>
+                        <div class="feature-icon">{{ $settings['landing_feature_3_icon']->value ?? '📊' }}</div>
+                        <h5>{{ $settings['landing_feature_3_title']->value ?? 'Laporan Ringkas' }}</h5>
+                        <p class="text-muted">{{ $settings['landing_feature_3_description']->value ?? 'Pantau kesehatan finansial Anda melalui dashboard yang informatif dan mudah dipahami.' }}</p>
                     </div>
                 </div>
             </div>

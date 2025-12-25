@@ -85,6 +85,7 @@
                     <a href="{{ route('admin.logs.index') }}" class="{{ request()->routeIs('admin.logs.*') ? 'active' : '' }}"> <i class="bi bi-journal-text me-1"></i> Activity Logs</a>
                     <a href="{{ route('admin.backups.index') }}" class="{{ request()->routeIs('admin.backups.*') ? 'active' : '' }}"> <i class="bi bi-download me-1"></i> Database Backups</a>
                     <a href="{{ route('admin.tips.index') }}" class="{{ request()->routeIs('admin.tips.*') ? 'active' : '' }}"> <i class="bi bi-lightbulb me-1"></i> Tips Keuangan</a>
+                    <a href="{{ route('admin.landing.index') }}" class="{{ request()->routeIs('admin.landing.*') ? 'active' : '' }}"><i class="bi bi-layout-text-window-reverse me-1"></i> Landing Page</a>
                     <a href="{{ route('admin.system.maintenance') }}" class="{{ request()->routeIs('admin.system.*') ? 'active' : '' }}"> <i class="bi bi-gear me-1"></i> System</a>
                 </div>
             @else
