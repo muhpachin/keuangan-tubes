@@ -21,11 +21,9 @@
                             @endforeach
                             <option value="Lain-lain">Lain-lain</option>
                         </select>
-                        <!-- Button trigger modal untuk menambah kategori -->
-                         <!-- Note: Controller belum tentu support storeKategoriPengeluaran di route ini, check web.php nanti. 
-                              Kalau belum ada route-nya, di-hidden dulu atau pakai route yang ada. 
-                              Untuk amannya sementara kita hide tombol tambah kategori jika route belum siap, 
-                              tapi user minta perbaikan view jadi kita asumsikan fitur standar. -->
+                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#kategoriModal">
+                            +
+                        </button>
                     </div>
                 </div>
 
@@ -124,6 +122,40 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Kategori -->
+<div class="modal fade" id="kategoriModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('pengeluaran.store_kategori') }}">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title">Kelola Kategori Pengeluaran</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Nama Kategori Baru</label>
+                        <input type="text" name="nama_kategori" class="form-control" required placeholder="Contoh: Transportasi, Makan, Belanja">
+                    </div>
+                    <hr>
+                    <h6>Daftar Kategori Anda:</h6>
+                    <ul class="list-group list-group-flush">
+                        @foreach($kategori as $kat)
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ $kat->nama_kategori }}
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Kategori</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

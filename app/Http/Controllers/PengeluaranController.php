@@ -64,6 +64,17 @@ class PengeluaranController extends Controller
         return back()->with('success', 'Pengeluaran berhasil dicatat.');
     }
 
+    // Method Baru: Tambah Kategori Pengeluaran
+    public function storeKategori(Request $request)
+    {
+        $request->validate(['nama_kategori' => 'required']);
+        KategoriPengeluaran::create([
+            'user_id' => Auth::id(),
+            'nama_kategori' => $request->nama_kategori
+        ]);
+        return back()->with('success', 'Kategori pengeluaran baru ditambahkan.');
+    }
+
     public function destroy($id)
     {
         DB::transaction(function() use ($id) {
