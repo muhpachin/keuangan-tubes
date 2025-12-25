@@ -1,12 +1,21 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Model;
 
 class Rekening extends Model
 {
-    protected $table = 'rekening'; // Nama tabel di SQL
-    protected $guarded = ['id'];   // Semua kolom bisa diisi kecuali ID
+    protected $table = 'rekening';
+    
+    // --- TAMBAHKAN INI AGAR TIDAK ERROR 'updated_at' ---
+    public $timestamps = false;
+    // ---------------------------------------------------
 
-    public function user() { return $this->belongsTo(User::class); }
+    protected $guarded = ['id']; 
+
+    public function user() 
+    { 
+        return $this->belongsTo(User::class); 
+    }
 }
