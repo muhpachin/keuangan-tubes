@@ -2,24 +2,50 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use HasFactory, Notifiable;
 
-    // Sesuai kolom di tabel 'users'
+    // =================================================================
+    // PENTING: Baris ini WAJIB ADA karena tabel 'users' Anda 
+    // tidak memiliki kolom 'updated_at'.
+    // =================================================================
+    public $timestamps = false; 
+
     protected $fillable = [
-        'name', 'username', 'email', 'password', 'google_id', 
-        'security_question', 'security_answer', 'tipe_akun', 
-        'fcm_token', 'reset_token', 'reset_token_expiry'
+        'username',
+        'email',
+        'password',
+        'google_id',
+        'security_question',
+        'security_answer',
+        'tipe_akun',
+        'reset_token',
+        'reset_token_expiry',
+        // 'fcm_token' juga ada di database Anda, bisa ditambahkan jika perlu
+        'fcm_token' 
     ];
 
-    protected $hidden = ['password', 'remember_token', 'security_answer'];
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'security_answer',
+    ];
 
-    // Relasi
-    public function rekening() { return $this->hasMany(Rekening::class); }
-    public function pemasukan() { return $this->hasMany(Pemasukan::class); }
-    public function pengeluaran() { return $this->hasMany(Pengeluaran::class); }
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+    
+    // Relasi ke rekening
+    public function rekening() { 
+        return $this->hasMany(Rekening::class); 
+    }
 }
