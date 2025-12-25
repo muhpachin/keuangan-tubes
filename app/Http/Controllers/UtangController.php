@@ -28,6 +28,8 @@ class UtangController extends Controller
             'user_id' => Auth::id(),
             'deskripsi' => $request->deskripsi,
             'jumlah' => $request->jumlah,
+            'sisa_jumlah' => $request->jumlah, // Set sisa_jumlah sama dengan jumlah awal
+            'tanggal' => now(), // Set tanggal sekarang
             'jatuh_tempo' => $request->jatuh_tempo,
             'status' => 'Belum Lunas'
         ]);
@@ -50,7 +52,10 @@ class UtangController extends Controller
                 // 1. Update Utang jadi Lunas
                 Utang::where('user_id', $userId)
                     ->where('id', $request->id_utang)
-                    ->update(['status' => 'Lunas']);
+                    ->update([
+                        'status' => 'Lunas',
+                        'sisa_jumlah' => 0 // Set sisa_jumlah ke 0 saat lunas
+                    ]);
 
                 // 2. Potong Saldo Rekening
                 Rekening::where('id', $request->rekening_id)
