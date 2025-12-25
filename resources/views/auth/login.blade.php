@@ -24,7 +24,10 @@
             </div>
             <div class="col-lg-6">
                 <div class="login-form">
-                    <h3 class="mb-4">Selamat Datang</h3>
+                    <div class="d-flex align-items-center mb-4">
+                        <img src="{{ asset('logo1.svg') }}" alt="Logo" style="width:48px; height:auto; margin-right:12px;">
+                        <h3 class="mb-0">Selamat Datang</h3>
+                    </div>
                     
                     @if(session('success'))
                         <div class="alert alert-success">{{ session('success') }}</div>

@@ -24,7 +24,10 @@
             </div>
             <div class="col-lg-6">
                 <div class="register-form">
-                    <h3 class="mb-4">Buat Akun Baru</h3>
+                    <div class="d-flex align-items-center mb-4">
+                        <img src="{{ asset('logo1.svg') }}" alt="Logo" style="width:48px; height:auto; margin-right:12px;">
+                        <h3 class="mb-0">Buat Akun Baru</h3>
+                    </div>
 
                     @if($errors->any())
                         <div class="alert alert-danger">
