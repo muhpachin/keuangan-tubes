@@ -6,14 +6,23 @@
     <title>@yield('title', 'Keuangan')</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     
-    <style>
+    <style>    
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f8f9fa; }
         .body-no-scroll { overflow: hidden; }
         .sidebar { width: 250px; height: 100vh; position: fixed; left: 0; top: 0; background: linear-gradient(to bottom, #007bff, #0056b3); color: white; padding-top: 20px; transition: transform 0.3s ease-in-out; z-index: 1051; display: flex; flex-direction: column; }
         .sidebar-menu { flex-grow: 1; overflow-y: auto; }
         .sidebar a { display: block; padding: 12px 20px; color: white; text-decoration: none; transition: background-color 0.2s; }
         .sidebar a.active, .sidebar a:hover { background: rgba(255, 255, 255, 0.2); }
+        /* Admin submenu */
+        .admin-toggle { display:block; padding: 12px 20px; color: white; text-decoration: none; cursor: pointer; }
+        .admin-toggle .bi { vertical-align: -.125em; }
+        .sidebar .collapse a { padding-left: 36px; }
+        .sidebar .collapse a .bi { vertical-align: -.125em; }
+        .sidebar .collapse a.active, .sidebar .collapse a:hover { background: rgba(255,255,255,0.08); }
+        .sidebar .admin-chevron { float: right; margin-top: 2px; }
+        
         .main-content { transition: margin-left 0.3s ease-in-out; }
         .card { border: none; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1050; display: none; }
@@ -43,15 +52,25 @@
                 <h3>KEUANGAN</h3>
             </div>
             
-            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
-            <a href="{{ route('rekening.index') }}" class="{{ request()->routeIs('rekening.*') ? 'active' : '' }}">Rekening</a>
-            <a href="{{ route('pemasukan.index') }}" class="{{ request()->routeIs('pemasukan.*') ? 'active' : '' }}">Pemasukan</a>
-            <a href="{{ route('pengeluaran.index') }}" class="{{ request()->routeIs('pengeluaran.*') ? 'active' : '' }}">Pengeluaran</a>
-            <a href="{{ route('transfer.index') }}" class="{{ request()->routeIs('transfer.*') ? 'active' : '' }}">Transfer</a>
-            <a href="{{ route('utang.index') }}" class="{{ request()->routeIs('utang.*') ? 'active' : '' }}">Utang</a>
-            <a href="{{ route('laporan.index') }}" class="{{ request()->routeIs('laporan.*') ? 'active' : '' }}">Laporan</a>
-            @if(Auth::check() && Auth::user()->tipe_akun === 'admin')
-                <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.*') ? 'active' : '' }}">Admin</a>
+            @if(Auth::check() && Auth::user()->isAdmin())
+                <a class="admin-toggle {{ request()->routeIs('admin.*') ? 'active' : '' }}" data-bs-toggle="collapse" href="#adminMenu" role="button" aria-expanded="{{ request()->routeIs('admin.*') ? 'true' : 'false' }}" aria-controls="adminMenu">
+                    <i class="bi bi-shield-lock-fill me-1"></i> Admin
+                    <i class="bi bi-caret-down-fill admin-chevron"></i>
+                </a>
+                <div class="collapse {{ request()->routeIs('admin.*') ? 'show' : '' }}" id="adminMenu">
+                    <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"> <i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+                    <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}"> <i class="bi bi-people me-1"></i> Manajemen User</a>
+                    <a href="{{ route('admin.default_categories.index') }}" class="{{ request()->routeIs('admin.default_categories.*') ? 'active' : '' }}"> <i class="bi bi-list-ul me-1"></i> Default Categories</a>
+                    <a href="{{ route('admin.logs.index') }}" class="{{ request()->routeIs('admin.logs.*') ? 'active' : '' }}"> <i class="bi bi-journal-text me-1"></i> Activity Logs</a>
+                </div>
+            @else
+                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
+                <a href="{{ route('rekening.index') }}" class="{{ request()->routeIs('rekening.*') ? 'active' : '' }}">Rekening</a>
+                <a href="{{ route('pemasukan.index') }}" class="{{ request()->routeIs('pemasukan.*') ? 'active' : '' }}">Pemasukan</a>
+                <a href="{{ route('pengeluaran.index') }}" class="{{ request()->routeIs('pengeluaran.*') ? 'active' : '' }}">Pengeluaran</a>
+                <a href="{{ route('transfer.index') }}" class="{{ request()->routeIs('transfer.*') ? 'active' : '' }}">Transfer</a>
+                <a href="{{ route('utang.index') }}" class="{{ request()->routeIs('utang.*') ? 'active' : '' }}">Utang</a>
+                <a href="{{ route('laporan.index') }}" class="{{ request()->routeIs('laporan.*') ? 'active' : '' }}">Laporan</a>
             @endif
             
             <form action="{{ route('logout') }}" method="POST" id="logout-form">

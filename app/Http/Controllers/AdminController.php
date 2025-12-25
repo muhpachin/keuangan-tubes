@@ -48,9 +48,31 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('totalUsers', 'activeToday', 'activeThisMonth', 'totalTransactions', 'labels', 'data'));
     }
 
-    public function usersIndex()
+    public function usersIndex(Request $request)
     {
-        $users = User::orderBy('created_at', 'desc')->paginate(25);
+        $query = User::query();
+
+        // search by username or email
+        if ($q = $request->query('q')) {
+            $query->where(function($q2) use ($q) {
+                $q2->where('username', 'like', "%{$q}%")
+                   ->orWhere('email', 'like', "%{$q}%");
+            });
+        }
+
+        // filter by status
+        if ($status = $request->query('status')) {
+            if ($status === 'banned') {
+                $query->where('is_banned', 1);
+            } elseif ($status === 'active') {
+                $query->where(function($q3) {
+                    $q3->where('is_banned', 0)->orWhereNull('is_banned');
+                });
+            }
+        }
+
+        $users = $query->orderBy('created_at', 'desc')->paginate(25)->withQueryString();
+
         return view('admin.users.index', compact('users'));
     }
 

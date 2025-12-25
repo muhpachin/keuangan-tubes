@@ -49,4 +49,10 @@ class User extends Authenticatable
     public function rekening() {
         return $this->hasMany(Rekening::class);
     }
+
+    // Convenience helper to check if user is admin
+    public function isAdmin()
+    {
+        return ($this->tipe_akun === 'admin') || (isset($this->is_admin) && $this->is_admin == 1);
+    }
 }
