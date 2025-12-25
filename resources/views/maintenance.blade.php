@@ -11,6 +11,11 @@
         <h3>Maaf, Sistem Sedang Perbaikan</h3>
         <p class="mt-3">{{ $message ?? 'Sistem sedang dalam perbaikan. Silakan kembali nanti.' }}</p>
         <p class="text-muted">Jika Anda admin, silakan masuk dengan akun admin untuk mengelola.</p>
+        <div class="mt-3">
+            @if (Route::has('login'))
+                <a href="{{ route('login') }}" class="btn btn-primary">Admin Login</a>
+            @endif
+        </div>
     </div>
 </body>
 </html>

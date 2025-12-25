@@ -36,6 +36,27 @@
         
         @media (min-width: 992px) { .main-content { margin-left: 250px; } }
         @media (max-width: 991.98px) { .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); } .main-content { margin-left: 0; } }
+
+        /* Constrain large images or SVGs inside main content to avoid accidental oversized assets */
+        .main-content img, .main-content svg { max-width: 100%; height: auto; max-height: 160px; display:block; }
+        .main-content .img-fluid { max-height: 160px; }
+
+        /* Keep UI icons small (pagination / nav / buttons) so global svg rule above doesn't enlarge them */
+        nav[role="navigation"] svg,
+        .pagination svg,
+        .page-item svg,
+        .page-link svg,
+        .btn svg,
+        i.bi {
+            max-height: 24px !important;
+            max-width: 24px !important;
+            height: auto !important;
+            width: auto !important;
+            font-size: 1rem !important;
+        }
+
+        .sidebar img { max-width: 70px; max-height: 70px; }
+        
     </style>
 </head>
 <body>
@@ -126,9 +147,16 @@
 
         // Simple Loader logic for links
         document.querySelectorAll('.sidebar a').forEach(link => {
-            link.addEventListener('click', function() {
-                if(this.getAttribute('href') !== '#') {
+            link.addEventListener('click', function(e) {
+                try {
+                    const href = this.getAttribute('href') || '';
+                    // Skip in-page anchors or bootstrap collapse toggles (they don't navigate page)
+                    if (href.startsWith('#') || this.hasAttribute('data-bs-toggle') || href.trim() === '' || href.trim().toLowerCase() === 'javascript:void(0)') {
+                        return;
+                    }
                     document.getElementById('loader').classList.add('active');
+                } catch (err) {
+                    // ignore JS errors here
                 }
             });
         });

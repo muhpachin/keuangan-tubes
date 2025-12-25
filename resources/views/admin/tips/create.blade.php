@@ -19,7 +19,8 @@
             <input type="file" name="image" class="form-control">
         </div>
         <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" name="is_active" id="is_active" checked>
+            <input type="hidden" name="is_active" value="0">
+            <input class="form-check-input" type="checkbox" name="is_active" id="is_active" value="1" checked>
             <label class="form-check-label" for="is_active">Tampilkan</label>
         </div>
         <div class="mb-3">

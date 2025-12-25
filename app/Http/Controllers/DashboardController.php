@@ -39,10 +39,19 @@ class DashboardController extends Controller
         $saldoTunai = $rekeningList->where('tipe', 'TUNAI')->sum('saldo');
 
         // Select one random active tip (publish_at null or <= now)
-        $tip = Tip::where('is_active', 1)
-            ->where(function($q){
-                $q->whereNull('publish_at')->orWhere('publish_at', '<=', now());
-            })->inRandomOrder()->first();
+        $tip = null;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('tips')) {
+                $tip = Tip::where('is_active', 1)
+                    ->where(function($q){
+                        $q->whereNull('publish_at')->orWhere('publish_at', '<=', now());
+                    })->inRandomOrder()->first();
+            }
+        } catch (\Throwable $e) {
+            // If something goes wrong (table missing, DB issues), log and continue without tip
+            \Illuminate\Support\Facades\Log::warning('Failed to fetch tip for dashboard: ' . $e->getMessage());
+            $tip = null;
+        }
 
         return view('dashboard.index', compact(
             'totalPemasukan', 'totalPengeluaran', 'rekeningList', 

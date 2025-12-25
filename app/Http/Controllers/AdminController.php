@@ -71,7 +71,9 @@ class AdminController extends Controller
             }
         }
 
-        $users = $query->orderBy('created_at', 'desc')->paginate(25)->withQueryString();
+        $per = (int) $request->query('per', 25);
+        $per = in_array($per, [10,25,50]) ? $per : 25;
+        $users = $query->orderBy('created_at', 'desc')->paginate($per)->withQueryString();
 
         return view('admin.users.index', compact('users'));
     }

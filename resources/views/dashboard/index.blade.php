@@ -7,6 +7,17 @@
     <h2>Selamat Datang, {{ Auth::user()->username }}!</h2>
     <p class="text-muted">Ringkasan keuangan bulan ini.</p>
 
+    @if(isset($tip) && $tip)
+    <div class="card p-3 mb-4">
+        <h6 class="mb-2">Tip: {{ $tip->title }}</h6>
+        <p class="mb-2">{{ \Illuminate\Support\Str::limit($tip->body, 250) }}</p>
+        @if($tip->image)
+            <img src="{{ asset('storage/'.$tip->image) }}" alt="tip" class="img-fluid mb-2" style="max-height:160px;">
+        @endif
+        <small class="text-muted">Tip dipilih acak untuk setiap login</small>
+    </div>
+    @endif
+
     <div class="row mt-4">
         <div class="col-lg-3 col-md-6 mb-4">
             <div class="card p-3">
@@ -60,16 +71,7 @@
                 <h4 class="display-6 mt-2">Rp {{ number_format($saldoTunai, 0, ',', '.') }}</h4>
             </div>
 
-            @if(isset($tip) && $tip)
-            <div class="card p-3">
-                <h6 class="mb-2">Tip: {{ $tip->title }}</h6>
-                <p class="mb-2">{{ \Illuminate\Support\Str::limit($tip->body, 180) }}</p>
-                @if($tip->image)
-                    <img src="{{ asset('storage/'.$tip->image) }}" alt="tip" class="img-fluid" style="max-height:120px;">
-                @endif
-                <small class="text-muted">Tip dipilih acak untuk setiap login</small>
-            </div>
-            @endif
+
         </div>
     </div>
 
