@@ -48,4 +48,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/utang/bayar', [UtangController::class, 'bayar'])->name('utang.bayar');
     Route::resource('utang', UtangController::class);
     Route::get('/laporan', [App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
+
+});
+
+// ADMIN PANEL (Harus Admin)
+Route::prefix('admin')->middleware(['auth','is_admin'])->group(function () {
+    Route::get('/', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/users', [App\Http\Controllers\AdminController::class, 'usersIndex'])->name('admin.users.index');
+    Route::get('/users/{user}', [App\Http\Controllers\AdminController::class, 'usersShow'])->name('admin.users.show');
+    Route::post('/users/{user}/ban', [App\Http\Controllers\AdminController::class, 'ban'])->name('admin.users.ban');
+    Route::post('/users/{user}/reset-password', [App\Http\Controllers\AdminController::class, 'resetPassword'])->name('admin.users.reset_password');
 });

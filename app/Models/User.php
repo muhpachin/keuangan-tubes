@@ -27,7 +27,9 @@ class User extends Authenticatable
         'reset_token',
         'reset_token_expiry',
         // 'fcm_token' juga ada di database Anda, bisa ditambahkan jika perlu
-        'fcm_token'
+        'fcm_token',
+        'is_banned',
+        'last_login_at',
     ];
 
     protected $hidden = [
@@ -39,6 +41,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'reset_token_expiry' => 'datetime',
+        'last_login_at' => 'datetime',
     ];
 
     // Relasi ke rekening

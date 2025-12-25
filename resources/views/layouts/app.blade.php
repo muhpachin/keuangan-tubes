@@ -50,6 +50,9 @@
             <a href="{{ route('transfer.index') }}" class="{{ request()->routeIs('transfer.*') ? 'active' : '' }}">Transfer</a>
             <a href="{{ route('utang.index') }}" class="{{ request()->routeIs('utang.*') ? 'active' : '' }}">Utang</a>
             <a href="{{ route('laporan.index') }}" class="{{ request()->routeIs('laporan.*') ? 'active' : '' }}">Laporan</a>
+            @if(Auth::check() && Auth::user()->tipe_akun === 'admin')
+                <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.*') ? 'active' : '' }}">Admin</a>
+            @endif
             
             <form action="{{ route('logout') }}" method="POST" id="logout-form">
                 @csrf

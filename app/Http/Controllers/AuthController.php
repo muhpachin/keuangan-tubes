@@ -166,8 +166,20 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
+        // Prevent banned users
+        $candidate = User::where('username', $request->username)->first();
+        if ($candidate && $candidate->is_banned) {
+            return back()->with('error', 'Akun ini diblokir. Hubungi administrator.');
+        }
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+
+            // Update last login timestamp
+            $user = Auth::user();
+            $user->last_login_at = now();
+            $user->save();
+
             return redirect()->route('dashboard');
         }
 
