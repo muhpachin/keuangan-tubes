@@ -8,28 +8,36 @@
     <div class="col-lg-5 mb-4">
         <div class="card p-4">
             <h4>Tambah/Edit Rekening</h4>
-            <form method="POST" action="{{ route('rekening.store') }}">
+            <form method="POST" action="{{ isset($editing) ? route('rekening.update', $editing->id) : route('rekening.store') }}">
                 @csrf
+                @if(isset($editing)) @method('PUT') @endif
+
                 <div class="mb-3">
                     <label>Nama Rekening</label>
-                    <input type="text" name="nama_rekening" class="form-control" required placeholder="Contoh: BCA, Dompet, Gopay">
+                    <input type="text" name="nama_rekening" class="form-control" required placeholder="Contoh: BCA, Dompet, Gopay" value="{{ old('nama_rekening', $editing->nama_rekening ?? '') }}">
                 </div>
                 <div class="mb-3">
                     <label>Tipe</label>
                     <select name="tipe" class="form-select" required>
-                        <option value="BANK">Bank / E-Wallet</option>
-                        <option value="TUNAI">Tunai / Dompet Fisik</option>
+                        <option value="BANK" {{ old('tipe', $editing->tipe ?? '') == 'BANK' ? 'selected' : '' }}>Bank / E-Wallet</option>
+                        <option value="TUNAI" {{ old('tipe', $editing->tipe ?? '') == 'TUNAI' ? 'selected' : '' }}>Tunai / Dompet Fisik</option>
                     </select>
                 </div>
                 <div class="mb-3">
                     <label>Saldo Awal (Rp)</label>
-                    <input type="number" name="saldo" class="form-control" value="0" required>
+                    <input type="number" name="saldo" class="form-control" value="{{ old('saldo', $editing->saldo ?? 0) }}" required>
                 </div>
                 <div class="mb-3">
                     <label>Saldo Minimum (Tidak bisa dipakai)</label>
-                    <input type="number" name="minimum_saldo" class="form-control" value="0">
+                    <input type="number" name="minimum_saldo" class="form-control" value="{{ old('minimum_saldo', $editing->minimum_saldo ?? 0) }}">
                 </div>
-                <button type="submit" class="btn btn-primary">Simpan</button>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">{{ isset($editing) ? 'Perbarui' : 'Simpan' }}</button>
+                    @if(isset($editing))
+                    <a href="{{ route('rekening.index') }}" class="btn btn-secondary">Batal</a>
+                    @endif
+                </div>
             </form>
         </div>
     </div>
@@ -58,6 +66,8 @@
                             </td>
                             <td>Rp {{ number_format($rek->saldo, 0, ',', '.') }}</td>
                             <td>
+                                <a href="{{ route('rekening.edit', $rek->id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+
                                 <form action="{{ route('rekening.destroy', $rek->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin hapus? Data tidak bisa dikembalikan.')">
                                     @csrf
                                     @method('DELETE')
