@@ -15,7 +15,8 @@ class UtangController extends Controller
     {
         $userId = Auth::id();
         $utang = Utang::where('user_id', $userId)
-            ->orderBy('status', 'asc') // Belum lunas diatas
+            ->orderBy('status', 'asc') // Tampilkan yang belum lunas dulu
+            ->orderBy('jatuh_tempo', 'asc')
             ->get();
         $rekening = Rekening::where('user_id', $userId)->get();
 
@@ -24,57 +25,91 @@ class UtangController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'deskripsi' => 'required',
+            'jumlah' => 'required|numeric|min:1',
+        ]);
+
         Utang::create([
             'user_id' => Auth::id(),
             'deskripsi' => $request->deskripsi,
             'jumlah' => $request->jumlah,
-            'sisa_jumlah' => $request->jumlah, // Set sisa_jumlah sama dengan jumlah awal
-            'tanggal' => now(), // Set tanggal sekarang
+            
+            // --- PERBAIKAN DI SINI ---
+            // Sisa jumlah awal = Jumlah utang
+            'sisa_jumlah' => $request->jumlah, 
+            // -------------------------
+
             'jatuh_tempo' => $request->jatuh_tempo,
             'status' => 'Belum Lunas'
         ]);
 
-        return back()->with('success', 'Utang dicatat.');
-    }
-
-    public function destroy($id)
-    {
-        Utang::where('user_id', Auth::id())->where('id', $id)->delete();
-        return back()->with('success', 'Data utang dihapus.');
+        return back()->with('success', 'Utang berhasil dicatat.');
     }
 
     public function bayar(Request $request)
     {
+        $request->validate([
+            'id_utang' => 'required',
+            'rekening_id' => 'required',
+            'jumlah_bayar' => 'required|numeric|min:1'
+        ]);
+
         try {
             DB::transaction(function() use ($request) {
                 $userId = Auth::id();
                 
-                // 1. Update Utang jadi Lunas
-                Utang::where('user_id', $userId)
-                    ->where('id', $request->id_utang)
-                    ->update([
-                        'status' => 'Lunas',
-                        'sisa_jumlah' => 0 // Set sisa_jumlah ke 0 saat lunas
-                    ]);
+                // 1. Ambil Data Utang
+                $utang = Utang::where('user_id', $userId)->findOrFail($request->id_utang);
 
-                // 2. Potong Saldo Rekening
-                Rekening::where('id', $request->rekening_id)
-                    ->decrement('saldo', $request->jumlah_bayar);
+                // Cek apakah pembayaran melebihi sisa utang
+                if ($request->jumlah_bayar > $utang->sisa_jumlah) {
+                    throw new \Exception("Jumlah bayar melebihi sisa utang (Sisa: " . number_format($utang->sisa_jumlah) . ")");
+                }
 
-                // 3. Catat di Pengeluaran (History)
+                // 2. Kurangi Sisa Jumlah
+                $sisaBaru = $utang->sisa_jumlah - $request->jumlah_bayar;
+                
+                $updateData = ['sisa_jumlah' => $sisaBaru];
+                
+                // Jika lunas (sisa 0), update status
+                if ($sisaBaru <= 0) {
+                    $updateData['status'] = 'Lunas';
+                }
+
+                $utang->update($updateData);
+
+                // 3. Potong Saldo Rekening
+                $rekening = Rekening::where('id', $request->rekening_id)->first();
+                if (!$rekening) throw new \Exception("Rekening tidak ditemukan.");
+                
+                // Cek saldo rekening (Logika biasa + 50rb)
+                if (($rekening->saldo - $rekening->minimum_saldo) < $request->jumlah_bayar) {
+                    throw new \Exception("Saldo rekening tidak cukup!");
+                }
+
+                $rekening->decrement('saldo', $request->jumlah_bayar);
+
+                // 4. Catat Otomatis di Pengeluaran
                 Pengeluaran::create([
                     'user_id' => $userId,
                     'kategori' => 'Pembayaran Utang',
-                    'deskripsi' => $request->deskripsi_utang,
+                    'deskripsi' => $request->deskripsi_utang . " (" . $utang->deskripsi . ")",
                     'jumlah' => $request->jumlah_bayar,
                     'rekening_id' => $request->rekening_id,
                     'tanggal' => now()
                 ]);
             });
 
-            return back()->with('success', 'Utang berhasil dibayar!');
+            return back()->with('success', 'Pembayaran berhasil dicatat!');
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal: ' . $e->getMessage());
+            return back()->with('error', 'Gagal bayar: ' . $e->getMessage());
         }
+    }
+
+    public function destroy($id)
+    {
+        Utang::where('user_id', Auth::id())->where('id', $id)->delete();
+        return back()->with('success', 'Data utang dihapus.');
     }
 }
