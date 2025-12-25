@@ -21,10 +21,15 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
+// Lupa / Reset Password
+Route::get('/password/forgot', [AuthController::class, 'showForgotForm'])->name('password.request');
+Route::post('/password/forgot', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
 
 // DASHBOARD & FITUR (Harus Login)
 Route::middleware('auth')->group(function () {
-    
+
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/tarik-tunai', [DashboardController::class, 'tarikTunai'])->name('dashboard.tarik');
 

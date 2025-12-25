@@ -11,10 +11,10 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     // =================================================================
-    // PENTING: Baris ini WAJIB ADA karena tabel 'users' Anda 
+    // PENTING: Baris ini WAJIB ADA karena tabel 'users' Anda
     // tidak memiliki kolom 'updated_at'.
     // =================================================================
-    public $timestamps = false; 
+    public $timestamps = false;
 
     protected $fillable = [
         'username',
@@ -27,7 +27,7 @@ class User extends Authenticatable
         'reset_token',
         'reset_token_expiry',
         // 'fcm_token' juga ada di database Anda, bisa ditambahkan jika perlu
-        'fcm_token' 
+        'fcm_token'
     ];
 
     protected $hidden = [
@@ -36,16 +36,13 @@ class User extends Authenticatable
         'security_answer',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-    
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'reset_token_expiry' => 'datetime',
+    ];
+
     // Relasi ke rekening
-    public function rekening() { 
-        return $this->hasMany(Rekening::class); 
+    public function rekening() {
+        return $this->hasMany(Rekening::class);
     }
 }

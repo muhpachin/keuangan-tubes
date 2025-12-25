@@ -5,7 +5,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17526921276"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);} 
+  function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'AW-17526921276');
 </script>
@@ -152,7 +152,7 @@
                             </ul>
                         </div>
                     @endif
-                    
+
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
                         <div class="mb-3">
@@ -164,7 +164,7 @@
                             <input type="password" class="form-control" id="password" name="password" required>
                         </div>
                         <div class="d-flex justify-content-end align-items-center mb-3">
-                            <small><a href="{{ url('/forgot-password') }}">Lupa Password?</a></small>
+                            <small><a href="{{ route('password.request') }}">Lupa Password?</a></small>
                         </div>
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary">Login</button>
