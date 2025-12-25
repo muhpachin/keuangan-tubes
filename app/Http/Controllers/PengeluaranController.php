@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pengeluaran;
 use App\Models\Rekening;
-use App\Models\KategoriPengeluaran; // Pastikan Model Kategori Pengeluaran ada
+use App\Models\KategoriPengeluaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -18,11 +18,14 @@ class PengeluaranController extends Controller
 
         if ($request->filter == 'harian') $query->whereDate('tanggal', today());
         elseif ($request->filter == 'mingguan') $query->whereBetween('tanggal', [now()->startOfWeek(), now()->endOfWeek()]);
+        elseif ($request->filter == 'bulanan') $query->whereMonth('tanggal', date('m'));
 
         $pengeluaran = $query->orderBy('tanggal', 'desc')->get();
         
-        // Sesuaikan Model Kategori Anda
-        $kategori = \App\Models\KategoriPengeluaran::where('user_id', $userId)->get();
+        // Pastikan Model KategoriPengeluaran sudah dibuat, jika belum bisa pakai array manual atau model Kategori biasa
+        // Cek apakah Anda punya model App\Models\KategoriPengeluaran, jika tidak ubah ke App\Models\Kategori
+        $kategori = \App\Models\KategoriPengeluaran::where('user_id', $userId)->get(); 
+        
         $rekening = Rekening::where('user_id', $userId)->get();
 
         return view('pengeluaran.index', compact('pengeluaran', 'kategori', 'rekening'));
@@ -30,40 +33,46 @@ class PengeluaranController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'jumlah' => 'required|numeric',
+            'rekening_id' => 'required',
+            'kategori' => 'required',
+            'tanggal' => 'required'
+        ]);
+
         DB::transaction(function() use ($request) {
             $userId = Auth::id();
             $rekening = Rekening::where('user_id', $userId)->find($request->rekening_id);
 
-            // Cek saldo cukup atau tidak (opsional, bisa dihapus jika ingin saldo minus)
-            if (($rekening->saldo - $rekening->minimum_saldo) < $request->jumlah) {
-                // throw new \Exception("Saldo tidak mencukupi!"); // Uncomment jika ingin strict
-            }
+            // LOGIKA PERBAIKAN: 
+            // Cek apakah deskripsi diisi? Jika kosong, pakai nama kategori.
+            $deskripsiFinal = $request->deskripsi ? $request->deskripsi : $request->kategori;
 
             Pengeluaran::create([
                 'user_id' => $userId,
                 'kategori' => $request->kategori,
-                'deskripsi' => $request->deskripsi,
+                'deskripsi' => $deskripsiFinal, // <--- Tidak akan NULL lagi
                 'jumlah' => $request->jumlah,
                 'rekening_id' => $request->rekening_id,
                 'tanggal' => $request->tanggal
             ]);
 
-            // Kurangi Saldo
+            // Kurangi Saldo Rekening
             $rekening->decrement('saldo', $request->jumlah);
         });
 
-        return back()->with('success', 'Pengeluaran dicatat.');
+        return back()->with('success', 'Pengeluaran berhasil dicatat.');
     }
 
     public function destroy($id)
     {
         DB::transaction(function() use ($id) {
-            $item = Pengeluaran::where('user_id', Auth::id())->findOrFail($id);
-            // Kembalikan Saldo (Tambah lagi)
-            Rekening::where('id', $item->rekening_id)->increment('saldo', $item->jumlah);
-            $item->delete();
+            $data = Pengeluaran::where('user_id', Auth::id())->findOrFail($id);
+            // Kembalikan Saldo (Refund) ke rekening
+            Rekening::where('id', $data->rekening_id)->increment('saldo', $data->jumlah);
+            $data->delete();
         });
 
-        return back()->with('success', 'Pengeluaran dihapus.');
+        return back()->with('success', 'Data dihapus dan saldo dikembalikan.');
     }
 }

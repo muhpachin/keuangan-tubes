@@ -1,13 +1,21 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Model;
 
 class Pengeluaran extends Model
 {
     protected $table = 'pengeluaran';
-    protected $guarded = ['id'];
-    public $timestamps = false; // Sesuai SQL
+    
+    // --- MATIKAN TIMESTAMP AGAR TIDAK ERROR ---
+    public $timestamps = false; 
+    // ------------------------------------------
 
-    public function rekening() { return $this->belongsTo(Rekening::class); }
+    protected $guarded = ['id'];
+
+    public function rekening()
+    {
+        return $this->belongsTo(Rekening::class);
+    }
 }
