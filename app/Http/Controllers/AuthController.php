@@ -20,6 +20,32 @@ class AuthController extends Controller
         return back()->with('error', 'Username atau password salah');
     }
 
+    public function showRegister() { return view('auth.register'); }
+
+    public function register(Request $request) {
+        $request->validate([
+            'username' => 'required|unique:users',
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6',
+            'security_question' => 'required',
+            'security_answer' => 'required'
+        ]);
+
+        $user = User::create([
+            'username' => $request->username,
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'security_question' => $request->security_question,
+            'security_answer' => $request->security_answer,
+            'tipe_akun' => 'gratis'
+        ]);
+
+        Auth::login($user);
+        return redirect()->route('dashboard')->with('success', 'Selamat datang! Akun berhasil dibuat.');
+    }
+
     public function redirectToGoogle() { return Socialite::driver('google')->redirect(); }
 
     public function handleGoogleCallback() {

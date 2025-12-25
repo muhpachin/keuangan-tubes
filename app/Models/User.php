@@ -11,7 +11,7 @@ class User extends Authenticatable
 
     // Sesuai kolom di tabel 'users'
     protected $fillable = [
-        'username', 'email', 'password', 'google_id', 
+        'name', 'username', 'email', 'password', 'google_id', 
         'security_question', 'security_answer', 'tipe_akun', 
         'fcm_token', 'reset_token', 'reset_token_expiry'
     ];

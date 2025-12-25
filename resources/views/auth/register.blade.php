@@ -43,6 +43,14 @@
                             <input type="text" name="username" class="form-control" required value="{{ old('username') }}">
                         </div>
                         <div class="mb-3">
+                            <label>Nama Lengkap</label>
+                            <input type="text" name="name" class="form-control" required value="{{ old('name') }}">
+                        </div>
+                        <div class="mb-3">
+                            <label>Email</label>
+                            <input type="email" name="email" class="form-control" required value="{{ old('email') }}">
+                        </div>
+                        <div class="mb-3">
                             <label>Password</label>
                             <input type="password" name="password" class="form-control" required>
                             <small class="text-muted">Minimal 6 karakter</small>

@@ -10,7 +10,7 @@ use App\Http\Controllers\TransferController;
 use App\Http\Controllers\UtangController;
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return view('landing');
 });
 
 // AUTH
