@@ -17,6 +17,7 @@ class DashboardController extends Controller
         $userId = Auth::id();
         $bulanIni = date('Y-m');
 
+        // Total Pemasukan & Pengeluaran Bulan Ini
         $totalPemasukan = Pemasukan::where('user_id', $userId)
             ->where('tanggal', 'like', "$bulanIni%")
             ->sum('jumlah');
@@ -25,12 +26,15 @@ class DashboardController extends Controller
             ->where('tanggal', 'like', "$bulanIni%")
             ->sum('jumlah');
 
+        // Data Rekening
         $rekeningList = Rekening::where('user_id', $userId)->get();
         
+        // Saldo yg bisa dipakai (Saldo - Minimum Saldo)
         $totalSaldoBisaDipakai = $rekeningList->sum(function($rek) {
             return $rek->saldo - $rek->minimum_saldo;
         });
 
+        // Saldo Tunai (Uang cash di tangan)
         $saldoTunai = $rekeningList->where('tipe', 'TUNAI')->sum('saldo');
 
         return view('dashboard.index', compact(
@@ -41,29 +45,57 @@ class DashboardController extends Controller
 
     public function tarikTunai(Request $request)
     {
-        $request->validate(['jumlah_tarik' => 'required|numeric', 'rekening_sumber_id' => 'required']);
-        $userId = Auth::id();
+        $request->validate([
+            'jumlah_tarik' => 'required|numeric|min:1',
+            'rekening_sumber_id' => 'required'
+        ]);
 
-        DB::transaction(function() use ($request, $userId) {
-            $sumber = Rekening::where('user_id', $userId)->find($request->rekening_sumber_id);
-            $tujuan = Rekening::where('user_id', $userId)->where('tipe', 'TUNAI')->first();
+        // Gunakan Try-Catch untuk menangkap error dan menjadikannya notifikasi
+        try {
+            DB::transaction(function() use ($request) {
+                $userId = Auth::id();
+                
+                // 1. Cari Rekening Sumber
+                $sumber = Rekening::where('user_id', $userId)->findOrFail($request->rekening_sumber_id);
+                
+                // 2. Cari Rekening Tujuan (Dompet Tunai)
+                $tujuan = Rekening::where('user_id', $userId)->where('tipe', 'TUNAI')->first();
 
-            if(!$tujuan) throw new \Exception("Rekening Tunai tidak ditemukan");
-            if(($sumber->saldo - $sumber->minimum_saldo) < $request->jumlah_tarik) throw new \Exception("Saldo tidak cukup");
+                if(!$tujuan) {
+                    throw new \Exception("Anda belum punya rekening tipe TUNAI (Dompet). Silakan buat di menu Rekening.");
+                }
 
-            $sumber->decrement('saldo', $request->jumlah_tarik);
-            $tujuan->increment('saldo', $request->jumlah_tarik);
+                // 3. Hitung Saldo yang Boleh Dipakai
+                // Rumus: Saldo Sekarang - Saldo Minimum (Default 50.000)
+                $saldoBisaDipakai = $sumber->saldo - $sumber->minimum_saldo;
 
-            Transfer::create([
-                'user_id' => $userId,
-                'jumlah' => $request->jumlah_tarik,
-                'rekening_sumber_id' => $sumber->id,
-                'rekening_tujuan_id' => $tujuan->id,
-                'deskripsi' => 'Tarik tunai ke dompet',
-                'tanggal' => now()
-            ]);
-        });
+                // 4. Cek Apakah Cukup?
+                if ($saldoBisaDipakai < $request->jumlah_tarik) {
+                    // Pesan ini yang akan muncul sebagai notifikasi merah di dashboard
+                    throw new \Exception("Saldo tidak cukup! Sisa yang bisa ditarik: Rp " . number_format($saldoBisaDipakai, 0, ',', '.'));
+                }
 
-        return back()->with('success', 'Tarik tunai berhasil');
+                // 5. Proses Tarik Tunai (Update Database)
+                $sumber->decrement('saldo', $request->jumlah_tarik);
+                $tujuan->increment('saldo', $request->jumlah_tarik);
+
+                // 6. Catat History Transfer
+                Transfer::create([
+                    'user_id' => $userId,
+                    'jumlah' => $request->jumlah_tarik,
+                    'rekening_sumber_id' => $sumber->id,
+                    'rekening_tujuan_id' => $tujuan->id,
+                    'deskripsi' => 'Tarik tunai ke dompet',
+                    'tanggal' => now()
+                ]);
+            });
+
+            // Jika Berhasil
+            return back()->with('success', 'Penarikan tunai berhasil!');
+
+        } catch (\Exception $e) {
+            // Jika Gagal (Saldo kurang, dll), kembali ke dashboard dengan pesan notifikasi error
+            return back()->with('error', $e->getMessage());
+        }
     }
 }
