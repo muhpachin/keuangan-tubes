@@ -42,7 +42,8 @@ class AuthController extends Controller
             'tipe_akun' => 'gratis', // Set default tipe akun
         ]);
 
-        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan login.');
+        // Tunjukkan pesan sukses di halaman register (sama seperti file PHP yang Anda kirim)
+        return back()->with('success', 'Registrasi berhasil! Silakan login.');
     }
 
     // Proses Login
