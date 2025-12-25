@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/pemasukan/kategori', [PemasukanController::class, 'storeKategori'])->name('pemasukan.store_kategori');
     Route::resource('pemasukan', PemasukanController::class);
 
+    Route::post('/pengeluaran/kategori', [PengeluaranController::class, 'storeKategori'])->name('pengeluaran.store_kategori');
     Route::resource('pengeluaran', PengeluaranController::class);
     Route::resource('transfer', TransferController::class);
 
