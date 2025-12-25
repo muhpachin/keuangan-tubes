@@ -70,6 +70,12 @@
                                         onclick="isiModalBayar({{ $item->id }}, '{{ $item->deskripsi }}', {{ $item->jumlah }})">
                                         Bayar
                                     </button>
+                                    <button class="btn btn-sm btn-primary mb-1" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editModal" 
+                                        onclick="isiModalEdit({{ $item->id }}, '{{ $item->deskripsi }}', {{ $item->jumlah }}, '{{ $item->jatuh_tempo }}')">
+                                        Edit
+                                    </button>
                                 @endif
                                 
                                 <form action="{{ route('utang.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus data ini?');" style="display:inline;">
@@ -132,12 +138,55 @@
     </div>
 </div>
 
+<!-- Modal Edit Utang -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="" id="editForm">
+                @csrf
+                @method('PUT')
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Utang</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Keterangan / Kepada Siapa</label>
+                        <input type="text" name="deskripsi" id="editDeskripsi" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label>Jumlah (Rp)</label>
+                        <input type="number" name="jumlah" id="editJumlah" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Jatuh Tempo (Opsional)</label>
+                        <input type="date" name="jatuh_tempo" id="editJatuhTempo" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     function isiModalBayar(id, deskripsi, jumlah) {
         document.getElementById('modalIdUtang').value = id;
         document.getElementById('modalDeskripsiUtang').value = 'Bayar Utang: ' + deskripsi;
         document.getElementById('modalJumlah').value = jumlah;
         document.getElementById('labelDeskripsi').innerText = deskripsi;
+    }
+
+    function isiModalEdit(id, deskripsi, jumlah, jatuhTempo) {
+        document.getElementById('editForm').action = '/utang/' + id;
+        document.getElementById('editDeskripsi').value = deskripsi;
+        document.getElementById('editJumlah').value = jumlah;
+        document.getElementById('editJatuhTempo').value = jatuhTempo;
     }
 </script>
 @endsection

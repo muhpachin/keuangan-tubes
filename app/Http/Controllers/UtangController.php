@@ -112,4 +112,38 @@ class UtangController extends Controller
         Utang::where('user_id', Auth::id())->where('id', $id)->delete();
         return back()->with('success', 'Data utang dihapus.');
     }
+
+    public function edit($id)
+    {
+        $utang = Utang::where('user_id', Auth::id())->findOrFail($id);
+        return response()->json($utang);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'deskripsi' => 'required',
+            'jumlah' => 'required|numeric|min:1',
+            'jatuh_tempo' => 'nullable|date'
+        ]);
+
+        $utang = Utang::where('user_id', Auth::id())->findOrFail($id);
+
+        // Jika jumlah berubah, update sisa_jumlah juga (jika belum lunas)
+        $sisaJumlah = $request->jumlah;
+        if ($utang->status == 'Belum Lunas') {
+            // Jika jumlah baru lebih besar, tambah sisa; jika lebih kecil, kurangi sisa tapi tidak kurang dari 0
+            $selisih = $request->jumlah - $utang->jumlah;
+            $sisaJumlah = max(0, $utang->sisa_jumlah + $selisih);
+        }
+
+        $utang->update([
+            'deskripsi' => $request->deskripsi,
+            'jumlah' => $request->jumlah,
+            'sisa_jumlah' => $sisaJumlah,
+            'jatuh_tempo' => $request->jatuh_tempo
+        ]);
+
+        return back()->with('success', 'Utang berhasil diperbarui.');
+    }
 }
