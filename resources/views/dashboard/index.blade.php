@@ -54,11 +54,22 @@
             </div>
         </div>
         <div class="col-lg-4 mb-4">
-            <div class="card p-4 bg-light h-100">
+            <div class="card p-4 bg-light h-100 mb-3">
                 <h4>Saldo Tunai</h4>
                 <h6>Uang Tunai di Tangan</h6>
                 <h4 class="display-6 mt-2">Rp {{ number_format($saldoTunai, 0, ',', '.') }}</h4>
             </div>
+
+            @if(isset($tip) && $tip)
+            <div class="card p-3">
+                <h6 class="mb-2">Tip: {{ $tip->title }}</h6>
+                <p class="mb-2">{{ \Illuminate\Support\Str::limit($tip->body, 180) }}</p>
+                @if($tip->image)
+                    <img src="{{ asset('storage/'.$tip->image) }}" alt="tip" class="img-fluid" style="max-height:120px;">
+                @endif
+                <small class="text-muted">Tip dipilih acak untuk setiap login</small>
+            </div>
+            @endif
         </div>
     </div>
 

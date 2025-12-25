@@ -9,6 +9,7 @@ use App\Models\Rekening;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
 use App\Models\Transfer;
+use App\Models\Tip;
 
 class DashboardController extends Controller
 {
@@ -37,9 +38,15 @@ class DashboardController extends Controller
         // Saldo Tunai (Uang cash di tangan)
         $saldoTunai = $rekeningList->where('tipe', 'TUNAI')->sum('saldo');
 
+        // Select one random active tip (publish_at null or <= now)
+        $tip = Tip::where('is_active', 1)
+            ->where(function($q){
+                $q->whereNull('publish_at')->orWhere('publish_at', '<=', now());
+            })->inRandomOrder()->first();
+
         return view('dashboard.index', compact(
             'totalPemasukan', 'totalPengeluaran', 'rekeningList', 
-            'totalSaldoBisaDipakai', 'saldoTunai'
+            'totalSaldoBisaDipakai', 'saldoTunai', 'tip'
         ));
     }
 

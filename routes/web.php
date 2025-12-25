@@ -69,4 +69,23 @@ Route::prefix('admin')->middleware(['auth','is_admin'])->group(function () {
 
     // Activity Logs
     Route::get('/logs', [App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('admin.logs.index');
+
+    // Database Backups
+    Route::get('/backups', [App\Http\Controllers\Admin\BackupController::class, 'index'])->name('admin.backups.index');
+    Route::post('/backups', [App\Http\Controllers\Admin\BackupController::class, 'store'])->name('admin.backups.store');
+    Route::get('/backups/{backup}/download', [App\Http\Controllers\Admin\BackupController::class, 'download'])->name('admin.backups.download');
+    Route::delete('/backups/{backup}', [App\Http\Controllers\Admin\BackupController::class, 'destroy'])->name('admin.backups.destroy');
+    Route::post('/backups/restore', [App\Http\Controllers\Admin\BackupController::class, 'restore'])->name('admin.backups.restore');
+
+    // Tips (CRUD)
+    Route::get('/tips', [App\Http\Controllers\Admin\TipController::class, 'index'])->name('admin.tips.index');
+    Route::get('/tips/create', [App\Http\Controllers\Admin\TipController::class, 'create'])->name('admin.tips.create');
+    Route::post('/tips', [App\Http\Controllers\Admin\TipController::class, 'store'])->name('admin.tips.store');
+    Route::get('/tips/{tip}/edit', [App\Http\Controllers\Admin\TipController::class, 'edit'])->name('admin.tips.edit');
+    Route::put('/tips/{tip}', [App\Http\Controllers\Admin\TipController::class, 'update'])->name('admin.tips.update');
+    Route::delete('/tips/{tip}', [App\Http\Controllers\Admin\TipController::class, 'destroy'])->name('admin.tips.destroy');
+
+    // System (maintenance)
+    Route::get('/system/maintenance', [App\Http\Controllers\Admin\SystemController::class, 'showMaintenance'])->name('admin.system.maintenance');
+    Route::post('/system/maintenance/toggle', [App\Http\Controllers\Admin\SystemController::class, 'toggleMaintenance'])->name('admin.system.maintenance.toggle');
 });

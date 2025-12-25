@@ -125,6 +125,9 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
+    // Backup recipients (comma separated)
+    'backup_recipients' => env('ADMIN_BACKUP_EMAILS', ''),
+
     /*
     |--------------------------------------------------------------------------
     | Maintenance Mode Driver
