@@ -177,7 +177,7 @@
                         <hr class="flex-grow-1">
                     </div>
 
-                    @if(class_exists(\Laravel\Socialite\Facades\Socialite::class) && Route::has('auth.google'))
+                    @if(Route::has('auth.google'))
                     <div class="d-grid">
                         <a href="{{ route('auth.google') }}" class="btn btn-danger">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-google me-2" viewBox="0 0 16 16">
@@ -188,7 +188,7 @@
                     </div>
                     @endif
                     <div class="text-center mt-4">
-                        <small class="text-muted">Belum punya akun? 
+                        <small class="text-muted">Belum punya akun?
                             @if(Route::has('register'))
                                 <a href="{{ route('register') }}">Daftar di sini</a>
                             @else
