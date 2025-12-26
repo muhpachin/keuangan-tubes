@@ -106,12 +106,40 @@
     </div>
 
     <div class="main-content p-3 p-md-4">
+        <!-- Desktop Navbar (visible on large screens) -->
+        <nav class="navbar navbar-light bg-light mb-4 d-none d-lg-flex">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h5">@yield('header_title', 'Dashboard')</span>
+                <div class="d-flex gap-2">
+                    @if(Auth::check() && !Auth::user()->isAdmin())
+                        <a href="{{ route('notifications.index') }}" class="btn btn-light position-relative" title="Notifikasi">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger unread-badge unread-badge-desktop" id="unreadCountDesktop" style="display:none;">
+                                <span id="unreadCountNumDesktop">0</span>
+                                <span class="visually-hidden">unread notifications</span>
+                            </span>
+                        </a>
+                    @endif
+                </div>
+            </div>
+        </nav>
+
+        <!-- Mobile Navbar -->
         <nav class="navbar navbar-light bg-light mb-4 d-lg-none">
             <div class="container-fluid">
                 <button class="navbar-toggler" type="button" id="sidebarToggle">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <span class="navbar-brand mb-0 h1">@yield('header_title', 'Dashboard')</span>
+                @if(Auth::check() && !Auth::user()->isAdmin())
+                    <a href="{{ route('notifications.index') }}" class="btn btn-light position-relative" title="Notifikasi">
+                        <i class="bi bi-bell"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger unread-badge unread-badge-mobile" id="unreadCountMobile" style="display:none;">
+                            <span id="unreadCountNumMobile">0</span>
+                            <span class="visually-hidden">unread notifications</span>
+                        </span>
+                    </a>
+                @endif
             </div>
         </nav>
 
@@ -130,6 +158,20 @@
         @yield('content')
     </div>
 
+    @if(Auth::check() && !Auth::user()->isAdmin())
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-info text-white">
+                    <strong class="me-auto">Notifikasi Baru</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toastMessage">
+                    Anda memiliki notifikasi baru
+                </div>
+            </div>
+        </div>
+    @endif
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
@@ -147,6 +189,57 @@
         if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
 
         // Simple Loader logic for links
+
+        // Notification Bell - Update unread count and check for new notifications
+        @if(Auth::check() && !Auth::user()->isAdmin())
+            function updateUnreadCount() {
+                fetch('{{ route("api.notifications.unread") }}')
+                    .then(r => r.json())
+                    .then(data => {
+                        // Update desktop badge
+                        const badgeDesktop = document.getElementById('unreadCountDesktop');
+                        const numDesktop = document.getElementById('unreadCountNumDesktop');
+                        if (data.count > 0) {
+                            numDesktop.textContent = data.count;
+                            badgeDesktop.style.display = 'inline-block';
+                        } else {
+                            badgeDesktop.style.display = 'none';
+                        }
+
+                        // Update mobile badge
+                        const badgeMobile = document.getElementById('unreadCountMobile');
+                        const numMobile = document.getElementById('unreadCountNumMobile');
+                        if (data.count > 0) {
+                            numMobile.textContent = data.count;
+                            badgeMobile.style.display = 'inline-block';
+                        } else {
+                            badgeMobile.style.display = 'none';
+                        }
+                    })
+                    .catch(e => console.log('Error fetching unread count:', e));
+            }
+
+            // Check on page load
+            updateUnreadCount();
+
+            // Check every 30 seconds
+            setInterval(updateUnreadCount, 30000);
+
+            // Show toast when new notifications arrive
+            let lastCount = 0;
+            setInterval(() => {
+                fetch('{{ route("api.notifications.unread") }}')
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.count > lastCount) {
+                            const toast = new bootstrap.Toast(document.getElementById('notificationToast'));
+                            document.getElementById('toastMessage').textContent = `Anda memiliki ${data.count} notifikasi baru`;
+                            toast.show();
+                            lastCount = data.count;
+                        }
+                    });
+            }, 60000);
+        @endif
         document.querySelectorAll('.sidebar a').forEach(link => {
             link.addEventListener('click', function(e) {
                 try {

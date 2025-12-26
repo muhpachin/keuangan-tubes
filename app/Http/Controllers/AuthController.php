@@ -158,12 +158,15 @@ class AuthController extends Controller
         if (class_exists(\App\Models\DefaultCategory::class)) {
             $defaults = \App\Models\DefaultCategory::all();
             foreach ($defaults as $d) {
-                // The application likely has a Kategori or KategoriPengeluaran model - attempt to create user categories
-                if (class_exists(\App\Models\Kategori::class)) {
-                    \App\Models\Kategori::create([
+                if ($d->type === 'pemasukan' && class_exists(\App\Models\Kategori::class)) {
+                    \App\Models\Kategori::firstOrCreate([
                         'user_id' => $user->id,
-                        'name' => $d->name,
-                        'type' => $d->type,
+                        'nama_kategori' => $d->name,
+                    ]);
+                } elseif ($d->type === 'pengeluaran' && class_exists(\App\Models\KategoriPengeluaran::class)) {
+                    \App\Models\KategoriPengeluaran::firstOrCreate([
+                        'user_id' => $user->id,
+                        'nama_kategori' => $d->name,
                     ]);
                 }
             }

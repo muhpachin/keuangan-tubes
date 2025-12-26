@@ -39,6 +39,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/tarik-tunai', [DashboardController::class, 'tarikTunai'])->name('dashboard.tarik');
 
+    // Notifications
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::delete('/notifications/{notification}', [App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::get('/api/notifications/unread-count', [App\Http\Controllers\NotificationController::class, 'getUnreadCount'])->name('api.notifications.unread');
+
     Route::resource('rekening', RekeningController::class);
 
     // --- PERBAIKAN DI SINI (Tambahkan Route Kategori) ---
@@ -59,6 +65,7 @@ Route::middleware('auth')->group(function () {
 // ADMIN PANEL (Harus Admin)
 Route::prefix('admin')->middleware(['auth','is_admin'])->group(function () {
     Route::get('/', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/insights', [App\Http\Controllers\AdminController::class, 'userInsights'])->name('admin.insights');
     Route::get('/users', [App\Http\Controllers\AdminController::class, 'usersIndex'])->name('admin.users.index');
     Route::get('/users/{user}', [App\Http\Controllers\AdminController::class, 'usersShow'])->name('admin.users.show');
     Route::post('/users/{user}/ban', [App\Http\Controllers\AdminController::class, 'ban'])->name('admin.users.ban');
@@ -67,10 +74,19 @@ Route::prefix('admin')->middleware(['auth','is_admin'])->group(function () {
     // Default Categories CRUD
     Route::get('/default-categories', [App\Http\Controllers\Admin\DefaultCategoryController::class, 'index'])->name('admin.default_categories.index');
     Route::get('/default-categories/create', [App\Http\Controllers\Admin\DefaultCategoryController::class, 'create'])->name('admin.default_categories.create');
+    Route::post('/default-categories/sync', [App\Http\Controllers\Admin\DefaultCategoryController::class, 'syncToUsers'])->name('admin.default_categories.sync');
+    Route::get('/default-categories/select-users', [App\Http\Controllers\Admin\DefaultCategoryController::class, 'selectUsersForSync'])->name('admin.default_categories.select_users');
+    Route::post('/default-categories/bulk-sync', [App\Http\Controllers\Admin\DefaultCategoryController::class, 'bulkSync'])->name('admin.default_categories.bulk_sync');
     Route::post('/default-categories', [App\Http\Controllers\Admin\DefaultCategoryController::class, 'store'])->name('admin.default_categories.store');
     Route::get('/default-categories/{defaultCategory}/edit', [App\Http\Controllers\Admin\DefaultCategoryController::class, 'edit'])->name('admin.default_categories.edit');
     Route::put('/default-categories/{defaultCategory}', [App\Http\Controllers\Admin\DefaultCategoryController::class, 'update'])->name('admin.default_categories.update');
     Route::delete('/default-categories/{defaultCategory}', [App\Http\Controllers\Admin\DefaultCategoryController::class, 'destroy'])->name('admin.default_categories.destroy');
+
+    // Notifications
+    Route::get('/notifications', [App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('admin.notifications.index');
+    Route::get('/notifications/create', [App\Http\Controllers\Admin\NotificationController::class, 'create'])->name('admin.notifications.create');
+    Route::post('/notifications', [App\Http\Controllers\Admin\NotificationController::class, 'store'])->name('admin.notifications.store');
+    Route::delete('/notifications/{notification}', [App\Http\Controllers\Admin\NotificationController::class, 'destroy'])->name('admin.notifications.destroy');
 
     // Activity Logs
     Route::get('/logs', [App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('admin.logs.index');

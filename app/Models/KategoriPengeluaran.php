@@ -11,4 +11,5 @@ class KategoriPengeluaran extends Model
     
     protected $table = 'kategori_pengeluaran';
     protected $guarded = ['id'];
+    public $timestamps = false;
 }

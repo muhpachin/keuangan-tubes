@@ -17,6 +17,10 @@
                 <option value="pemasukan" {{ $cat->type=='pemasukan' ? 'selected' : '' }}>Pemasukan</option>
             </select>
         </div>
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="sync_all" value="1" id="sync_all">
+            <label class="form-check-label" for="sync_all">Tambahkan ke semua user (jika belum ada)</label>
+        </div>
         <button class="btn btn-primary">Simpan</button>
     </form>
 </div>

@@ -13,16 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('riwayat_utang', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('utang_id');
-            $table->decimal('jumlah', 15, 2);
-            $table->date('tanggal');
-            $table->text('keterangan')->nullable();
-            $table->timestamps();
+        if (!Schema::hasTable('riwayat_utang')) {
+            Schema::create('riwayat_utang', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('utang_id');
+                $table->decimal('jumlah', 15, 2);
+                $table->date('tanggal');
+                $table->text('keterangan')->nullable();
+                $table->timestamps();
 
-            $table->foreign('utang_id')->references('id')->on('utang')->onDelete('cascade');
-        });
+                $table->foreign('utang_id')->references('id')->on('utang')->onDelete('cascade');
+            });
+        }
     }
 
     /**
