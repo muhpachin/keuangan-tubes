@@ -1,4 +1,4 @@
-FROM php:8.1-fpm
+FROM php:8.3-fpm
 
 # 1. Install system dependencies
 # Bagian ini harus rapi formatnya
