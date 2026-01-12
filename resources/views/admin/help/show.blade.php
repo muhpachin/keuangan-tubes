@@ -91,16 +91,27 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const msg = msgInput.value.trim();
             if (!msg) return;
-            await fetch('{{ route('admin.help.send') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ help_session_id: sessionId, message: msg })
-            });
-            msgInput.value = '';
-            fetchMessages();
+            try {
+                const res = await fetch('{{ route('admin.help.send') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ help_session_id: sessionId, message: msg })
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || errData.message || 'Server returned ' + res.status);
+                }
+
+                msgInput.value = '';
+                fetchMessages();
+            } catch (err) {
+                console.error(err);
+                alert('Gagal mengirim pesan: ' + err.message);
+            }
         });
     }
 });
