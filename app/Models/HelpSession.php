@@ -23,4 +23,12 @@ class HelpSession extends Model
     {
         return $this->hasMany(HelpMessage::class)->orderBy('created_at');
     }
+
+    public function addMessage($userId, $message)
+    {
+        return $this->messages()->create([
+            'user_id' => $userId,
+            'message' => $message,
+        ]);
+    }
 }
