@@ -39,7 +39,7 @@ COPY . .
 # Catatan: Jika ini environment lokal, sebaiknya composer install dijalankan manual 
 # atau pastikan folder vendor masuk .dockerignore
 RUN composer install --optimize-autoloader --no-dev --prefer-dist
-
+RUN composer install --optimize-autoloader --no-dev --prefer-dist --no-scripts
 # Set file permissions
 RUN chown -R www-data:www-data /var/www/html/storage \
     && chown -R www-data:www-data /var/www/html/bootstrap/cache \
