@@ -40,12 +40,17 @@ COPY . .
 # atau pastikan folder vendor masuk .dockerignore
 RUN composer install --optimize-autoloader --no-dev --prefer-dist
 RUN composer install --optimize-autoloader --no-dev --prefer-dist --no-scripts
-# Set file permissions
+# 1. Tambahkan ini agar Git tidak protes soal permission di dalam container
+RUN git config --global --add safe.directory /var/www/html
+
+# 2. Tambahkan --no-scripts di akhir perintah ini (PENTING)
+RUN composer install --optimize-autoloader --no-dev --prefer-dist --no-scripts
+
+# 3. Pastikan permission folder storage & cache benar
 RUN chown -R www-data:www-data /var/www/html/storage \
     && chown -R www-data:www-data /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
 EXPOSE 9000
-
 CMD ["php-fpm"]
