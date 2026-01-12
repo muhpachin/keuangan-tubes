@@ -77,11 +77,7 @@ class HelpController extends Controller
             return response()->json(['error' => 'Session closed'], 422);
         }
 
-        $msg = HelpMessage::create([
-            'help_session_id' => $session->id,
-            'user_id' => Auth::id(),
-            'message' => $request->message,
-        ]);
+        $msg = $session->addMessage(Auth::id(), $request->message);
 
         return response()->json($msg, 201);
     }
@@ -100,11 +96,7 @@ class HelpController extends Controller
             return response()->json(['error' => 'Session closed'], 422);
         }
 
-        $msg = HelpMessage::create([
-            'help_session_id' => $session->id,
-            'user_id' => Auth::id(),
-            'message' => $request->message,
-        ]);
+        $msg = $session->addMessage(Auth::id(), $request->message);
 
         return response()->json($msg, 201);
     }

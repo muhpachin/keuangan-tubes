@@ -26,9 +26,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if (Schema::hasTable('settings')) {
-            $settings = Setting::where('key', 'like', 'landing_%')->get()->keyBy('key');
-            View::share('settings', $settings);
+        try {
+            if (Schema::hasTable('settings')) {
+                $settings = Setting::where('key', 'like', 'landing_%')->get()->keyBy('key');
+                View::share('settings', $settings);
+            }
+        } catch (\Exception $e) {
+            // Database not available or settings table missing
         }
     }
 }
