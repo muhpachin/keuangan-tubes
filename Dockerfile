@@ -1,13 +1,14 @@
 FROM php:8.1-fpm
 
 # 1. Install system dependencies
+# Bagian ini harus rapi formatnya
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
-    libonig-dev \    # <--- TAMBAHKAN INI (Wajib untuk mbstring)
-    libxml2-dev \     # <--- Tambahan untuk XML support (sering dipakai Laravel)
+    libonig-dev \
+    libxml2-dev \
     locales \
     zip \
     jpegoptim optipng pngquant gifsicle \
