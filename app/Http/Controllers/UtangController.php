@@ -94,6 +94,7 @@ class UtangController extends Controller
                 // 3. Potong/Tambah Saldo Rekening
                 $rekening = Rekening::where('id', $request->rekening_id)
                     ->where('user_id', $userId)
+                    ->lockForUpdate() // Fix: Kunci rekening agar saldo aman saat transaksi
                     ->first();
                     
                 if (!$rekening) throw new \Exception("Rekening tidak ditemukan atau bukan milik Anda.");

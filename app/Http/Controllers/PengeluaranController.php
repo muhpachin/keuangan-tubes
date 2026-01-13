@@ -35,7 +35,7 @@ class PengeluaranController extends Controller
     {
         $request->validate([
             'jumlah' => 'required|numeric',
-            'rekening_id' => 'required',
+            'rekening_id' => 'required|exists:rekenings,id',
             'kategori' => 'required',
             'tanggal' => 'required'
         ]);
@@ -61,7 +61,7 @@ class PengeluaranController extends Controller
 
             Pengeluaran::create([
                 'user_id' => $userId,
-                'kategori' => $request->kategori,
+                'kategori' => $namaKategori, // Fix: Simpan Nama Kategori (Teks), bukan ID (Angka)
                 'deskripsi' => $deskripsiFinal, 
                 'jumlah' => $request->jumlah,
                 'rekening_id' => $request->rekening_id,

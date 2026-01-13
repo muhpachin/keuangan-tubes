@@ -39,7 +39,7 @@ class TransaksiController extends Controller
             'jumlah' => 'required|numeric|min:0',
             'jenis' => 'required|in:pemasukan,pengeluaran',
             'tanggal' => 'required|date',
-            'rekening_id' => 'required|exists:rekening,id',
+            'rekening_id' => 'required|exists:rekenings,id', // Fix: Standar Laravel nama tabel plural
             'kategori' => 'nullable|string'
         ]);
 
@@ -82,10 +82,19 @@ class TransaksiController extends Controller
     /**
      * Menampilkan satu transaksi spesifik.
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        // Implementasi sederhana: cari di kedua tabel
-        $data = Pemasukan::find($id) ?? Pengeluaran::find($id);
+        // Fix: Tambahkan parameter ?jenis=... untuk menghindari tabrakan ID antara Pemasukan & Pengeluaran
+        $jenis = $request->query('jenis');
+
+        if ($jenis === 'pemasukan') {
+            $data = Pemasukan::find($id);
+        } elseif ($jenis === 'pengeluaran') {
+            $data = Pengeluaran::find($id);
+        } else {
+            $data = Pemasukan::find($id) ?? Pengeluaran::find($id);
+        }
+        
         if(!$data) return response()->json(['message' => 'Not found'], 404);
         return response()->json($data);
     }
@@ -102,9 +111,32 @@ class TransaksiController extends Controller
     /**
      * Menghapus transaksi.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        // Delete via API dinonaktifkan sementara
-        return response()->json(['message' => 'Delete via API not supported yet. Please use Dashboard.'], 501);
+        // Fix: Implementasi Delete dengan rollback saldo
+        $jenis = $request->query('jenis');
+        
+        if (!in_array($jenis, ['pemasukan', 'pengeluaran'])) {
+            return response()->json(['message' => 'Parameter ?jenis=pemasukan atau ?jenis=pengeluaran wajib disertakan.'], 400);
+        }
+
+        try {
+            DB::transaction(function() use ($id, $jenis) {
+                if ($jenis === 'pemasukan') {
+                    $data = Pemasukan::where('user_id', Auth::id())->findOrFail($id);
+                    // Fix: Gunakan lockForUpdate untuk konsistensi saldo
+                    Rekening::where('id', $data->rekening_id)->lockForUpdate()->first()->decrement('saldo', $data->jumlah);
+                    $data->delete();
+                } else {
+                    $data = Pengeluaran::where('user_id', Auth::id())->findOrFail($id);
+                    // Fix: Gunakan lockForUpdate untuk konsistensi saldo
+                    Rekening::where('id', $data->rekening_id)->lockForUpdate()->first()->increment('saldo', $data->jumlah);
+                    $data->delete();
+                }
+            });
+            return response()->json(['message' => 'Transaksi berhasil dihapus dan saldo diperbarui.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Gagal menghapus: ' . $e->getMessage()], 500);
+        }
     }
 }
