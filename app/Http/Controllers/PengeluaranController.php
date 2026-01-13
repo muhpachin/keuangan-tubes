@@ -35,7 +35,7 @@ class PengeluaranController extends Controller
     {
         $request->validate([
             'jumlah' => 'required|numeric',
-            'rekening_id' => 'required|exists:rekenings,id',
+            'rekening_id' => 'required|exists:rekening,id',
             'kategori' => 'required',
             'tanggal' => 'required'
         ]);

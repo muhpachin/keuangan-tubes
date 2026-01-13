@@ -39,7 +39,7 @@ class TransaksiController extends Controller
             'jumlah' => 'required|numeric|min:0',
             'jenis' => 'required|in:pemasukan,pengeluaran',
             'tanggal' => 'required|date',
-            'rekening_id' => 'required|exists:rekenings,id', // Fix: Standar Laravel nama tabel plural
+            'rekening_id' => 'required|exists:rekening,id',
             'kategori' => 'nullable|string'
         ]);
 
