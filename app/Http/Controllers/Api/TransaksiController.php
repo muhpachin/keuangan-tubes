@@ -2,9 +2,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Transaksi;
+use App\Models\Pemasukan;
+use App\Models\Pengeluaran;
+use App\Models\Rekening;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class TransaksiController extends Controller
 {
@@ -13,8 +17,16 @@ class TransaksiController extends Controller
      */
     public function index()
     {
-        $transaksi = Transaksi::orderBy('tanggal', 'desc')->get();
-        return response()->json($transaksi);
+        $userId = Auth::id();
+        
+        // Ambil data dari Pemasukan dan Pengeluaran
+        $pemasukan = Pemasukan::where('user_id', $userId)->get()->map(function($item){ $item->jenis = 'pemasukan'; return $item; });
+        $pengeluaran = Pengeluaran::where('user_id', $userId)->get()->map(function($item){ $item->jenis = 'pengeluaran'; return $item; });
+        
+        // Gabung dan sort
+        $merged = $pemasukan->merge($pengeluaran)->sortByDesc('tanggal')->values();
+        
+        return response()->json($merged);
     }
 
     /**
@@ -27,45 +39,72 @@ class TransaksiController extends Controller
             'jumlah' => 'required|numeric|min:0',
             'jenis' => 'required|in:pemasukan,pengeluaran',
             'tanggal' => 'required|date',
+            'rekening_id' => 'required|exists:rekening,id',
+            'kategori' => 'nullable|string'
         ]);
 
-        $transaksi = Transaksi::create($validated);
+        $userId = Auth::id();
+        $transaksi = null;
 
-        return response()->json($transaksi, Response::HTTP_CREATED);
+        try {
+            DB::transaction(function() use ($request, $userId, &$transaksi) {
+                $rekening = Rekening::where('user_id', $userId)->lockForUpdate()->findOrFail($request->rekening_id);
+                
+                if ($request->jenis == 'pemasukan') {
+                    $transaksi = Pemasukan::create([
+                        'user_id' => $userId,
+                        'rekening_id' => $request->rekening_id,
+                        'kategori' => $request->kategori ?? 'Umum',
+                        'deskripsi' => $request->deskripsi,
+                        'jumlah' => $request->jumlah,
+                        'tanggal' => $request->tanggal
+                    ]);
+                    $rekening->increment('saldo', $request->jumlah);
+                } else {
+                    $transaksi = Pengeluaran::create([
+                        'user_id' => $userId,
+                        'rekening_id' => $request->rekening_id,
+                        'kategori' => $request->kategori ?? 'Umum',
+                        'deskripsi' => $request->deskripsi,
+                        'jumlah' => $request->jumlah,
+                        'tanggal' => $request->tanggal
+                    ]);
+                    $rekening->decrement('saldo', $request->jumlah);
+                }
+            });
+
+            return response()->json($transaksi, Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
      * Menampilkan satu transaksi spesifik.
      */
-    public function show(Transaksi $transaksi)
+    public function show($id)
     {
-        return response()->json($transaksi);
+        // Implementasi sederhana: cari di kedua tabel
+        $data = Pemasukan::find($id) ?? Pengeluaran::find($id);
+        if(!$data) return response()->json(['message' => 'Not found'], 404);
+        return response()->json($data);
     }
 
     /**
      * Memperbarui transaksi yang ada.
      */
-    public function update(Request $request, Transaksi $transaksi)
+    public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'deskripsi' => 'sometimes|required|string|max:255',
-            'jumlah' => 'sometimes|required|numeric|min:0',
-            'jenis' => 'sometimes|required|in:pemasukan,pengeluaran',
-            'tanggal' => 'sometimes|required|date',
-        ]);
-
-        $transaksi->update($validated);
-
-        return response()->json($transaksi);
+        // Update via API dinonaktifkan sementara untuk mencegah inkonsistensi saldo kompleks
+        return response()->json(['message' => 'Update via API not supported yet. Please use Dashboard.'], 501);
     }
 
     /**
      * Menghapus transaksi.
      */
-    public function destroy(Transaksi $transaksi)
+    public function destroy($id)
     {
-        $transaksi->delete();
-
-        return response()->json(null, Response::HTTP_NO_CONTENT);
+        // Delete via API dinonaktifkan sementara
+        return response()->json(['message' => 'Delete via API not supported yet. Please use Dashboard.'], 501);
     }
 }
