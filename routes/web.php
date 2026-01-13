@@ -37,12 +37,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/help', [App\Http\Controllers\HelpController::class, 'index'])->name('help.index');
     // Popup API (Must be before {id} wildcard)
     Route::get('/help/active', [App\Http\Controllers\HelpController::class, 'active'])->name('help.active');
-    
+
     Route::post('/help/start', [App\Http\Controllers\HelpController::class, 'start'])->name('help.start');
     Route::get('/help/{id}', [App\Http\Controllers\HelpController::class, 'show'])->name('help.show');
     Route::get('/help/messages/{id}', [App\Http\Controllers\HelpController::class, 'messages'])->name('help.messages');
     Route::post('/help/messages', [App\Http\Controllers\HelpController::class, 'sendMessage'])->name('help.send');
-    
+
     Route::post('/help/popup-send', [App\Http\Controllers\HelpController::class, 'popupSend'])->name('help.popup.send');
 });
 
@@ -137,4 +137,6 @@ Route::prefix('admin')->middleware(['auth','is_admin'])->group(function () {
     Route::post('/help/messages', [App\Http\Controllers\Admin\HelpController::class, 'sendMessage'])->name('admin.help.send');
     Route::post('/help/start/{user}', [App\Http\Controllers\Admin\HelpController::class, 'startSession'])->name('admin.help.start');
     Route::post('/help/{id}/close', [App\Http\Controllers\Admin\HelpController::class, 'close'])->name('admin.help.close');
+
+    
 });
