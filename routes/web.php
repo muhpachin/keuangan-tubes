@@ -128,12 +128,13 @@ Route::prefix('admin')->middleware(['auth','is_admin'])->group(function () {
     Route::post('/landing', [LandingPageController::class, 'update'])->name('admin.landing.update');
 
     // Help / Live Chat (Admin)
+    // Popup API (Must be before {id} wildcard)
+    Route::get('/help/active', [App\Http\Controllers\Admin\HelpController::class, 'active'])->name('admin.help.active');
+    Route::post('/popup-send', [App\Http\Controllers\Admin\HelpController::class, 'popupSend'])->name('admin.help.popup.send');
+
     Route::get('/help', [App\Http\Controllers\Admin\HelpController::class, 'index'])->name('admin.help.index');
     Route::get('/help/{id}', [App\Http\Controllers\Admin\HelpController::class, 'show'])->name('admin.help.show');
     Route::post('/help/messages', [App\Http\Controllers\Admin\HelpController::class, 'sendMessage'])->name('admin.help.send');
     Route::post('/help/start/{user}', [App\Http\Controllers\Admin\HelpController::class, 'startSession'])->name('admin.help.start');
     Route::post('/help/{id}/close', [App\Http\Controllers\Admin\HelpController::class, 'close'])->name('admin.help.close');
-    // Popup API for admin floating chat (returns most recent open session and messages)
-    Route::get('/help/active', [App\Http\Controllers\Admin\HelpController::class, 'active'])->name('admin.help.active');
-    Route::post('/popup-send', [App\Http\Controllers\Admin\HelpController::class, 'popupSend'])->name('admin.help.popup.send');
 });

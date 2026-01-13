@@ -33,9 +33,12 @@ class HelpController extends Controller
             return redirect()->back()->with('error', 'Session sudah ditutup, tidak dapat mengirim pesan.');
         }
 
-        $msg = $session->addMessage($request->user()->id, $request->message);
-
-        return response()->json($msg, 201);
+        try {
+            $msg = $session->addMessage($request->user()->id, $request->message);
+            return response()->json($msg, 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     // Admin can start or open a session for a specific user and be redirected to the admin chat
@@ -73,9 +76,12 @@ class HelpController extends Controller
             return response()->json(['error' => 'Session closed'], 422);
         }
 
-        $msg = $session->addMessage($request->user()->id, $request->message);
-
-        return response()->json($msg, 201);
+        try {
+            $msg = $session->addMessage($request->user()->id, $request->message);
+            return response()->json($msg, 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function close($id)
